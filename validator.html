@@ -1,0 +1,52 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
+    <title>Validator</title>
+  </head>
+
+  <body>
+    <div class="container text-center my-5">
+      <input id="address" class="w-100 form-control form-control-lg">
+      <button class="m-a btn btn-primary" id="validate">Validate</button>
+      <p class="lead" id="outcome"></p>
+    </div>
+  </body>
+
+  <script>
+  $(function(){
+    $('#validate').click(function(){
+      addr = $('#address').val(); // like 0xBDff6aeb83F064C3eB38360406AB8416cC8e20a2
+      console.log('sup' + addr);
+
+      var target = addr;
+      var caseId = 1;
+
+      var validatorContract = web3.eth.contract([{"inputs":[{"name":"target","type":"address"},{"name":"caseId","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]);
+      var contractData = validatorContract.new.getData(target, caseId, {
+        from: web3.eth.accounts[0],
+        data: '0x608060405234801561001057600080fd5b5060405160408061020f83398101604052805160209091015160018114156100495761004482640100000000610052810204565b61004b565bfe5b50506101cc565b6000610087827f01ffc9a700000000000000000000000000000000000000000000000000000000640100000000610096810204565b905080151561009257fe5b5050565b600080806100cd857f01ffc9a700000000000000000000000000000000000000000000000000000000640100000000610180810204565b90925090508115806100dd575080155b156100eb5760009250610178565b61011e857fffffffff00000000000000000000000000000000000000000000000000000000640100000000610180810204565b909250905081158061012f57508015155b1561013d5760009250610178565b6101508585640100000000610180810204565b90925090506001821480156101655750806001145b156101735760019250610178565b600092505b505092915050565b6040517f01ffc9a70000000000000000000000000000000000000000000000000000000080825260048201839052600091829190602081818189617530fa905190969095509350505050565b6035806101da6000396000f3006080604052600080fd00a165627a7a7230582077757ae86173903bd41ab13e46d71d6904dc360c179ebf1fd1b52c1e51d0cce70029',
+        gas: '6969696'
+      });
+
+      web3.eth.estimateGas({data: contractData}, function (e, result){
+        console.log('yo');
+        console.log(e, result);
+        if (!e) {
+          $("#outcome").text('Passed TEST 1')
+        } else {
+          $("#outcome").text('Error TEST 1')
+        }
+      });
+
+      $("#outcome").text('Pending TEST 1')
+    });
+  });
+  </script>
+</html>
