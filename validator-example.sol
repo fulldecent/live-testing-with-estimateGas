@@ -1,3 +1,12 @@
+THIS IS THE FINAL VERSION THAT SHOWS TESTING:
+
+- one test case
+- with a stub receiver
+
+
+xxxxx
+
+
 pragma solidity ^0.4.24;
 
 interface ERC721{}
