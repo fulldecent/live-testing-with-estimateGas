@@ -6,13 +6,13 @@ contract SuSquaresTests
     ERC721 testSubject;
 
     /// @notice Deploy test contract with subject to be used for all tests
-    constructor(address _testSubject)
+    public constructor(addr _testSubject)
     {
         testSubject = ERC721(_testSubject);
     }
-
+    
     /// @notice Test token supply invariant
-    function testIsTotalSupply10000() returns (bool)
+    external function testIsTotalSupply10000() returns (bool)
     {
     	bool testResult;
     	// Perform complicated testing.
