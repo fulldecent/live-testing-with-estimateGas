@@ -20,7 +20,7 @@
     "soldiity",
     "truffle"
   ],
-  "author": "William Entriken",
+  "author": "William Entriken and Tadej Vengust",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/fulldecent/estimateGas-testing/issues"
