@@ -3,10 +3,6 @@
   "version": "1.0.0",
   "description": "Explores techniques for testing deployed Ethereum smart contracts using estimateGas",
   "main": "index.js",
-  "dependencies": {
-    "@0xcert/ethereum-erc721": "^1.10.0",
-    "remixd": "^0.1.8-alpha.6"
-  },
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
