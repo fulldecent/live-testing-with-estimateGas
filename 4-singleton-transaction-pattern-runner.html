@@ -1,0 +1,81 @@
+<html>
+<head>
+  <title>Estimate gas tests</title>
+</head>
+<body>
+  <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.34/dist/web3.min.js" type="text/javascript"></script>
+  <script>
+
+    if(typeof window.web3 !== "undefined" && typeof window.web3.currentProvider !== "undefined") {
+      var web3 = new Web3(window.web3.currentProvider);
+    } else {
+      alert("No web3");
+    }
+
+    const abi = [
+      {
+        "constant": false,
+        "inputs": [
+          {
+            "name": "_testSubject",
+            "type": "address"
+          }
+        ],
+        "name": "testIsTotalSupply10000",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "name": "_testSubject",
+            "type": "address"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      }
+    ];
+
+    const bytecode = "0x608060405234801561001057600080fd5b5060405160208061021d8339810180604052602081101561003057600080fd5b81019080805190602001909291905050506100508161005660201b60201c565b506100e7565b6127108173ffffffffffffffffffffffffffffffffffffffff166318160ddd6040518163ffffffff1660e01b815260040160206040518083038186803b15801561009f57600080fd5b505afa1580156100b3573d6000803e3d6000fd5b505050506040513d60208110156100c957600080fd5b8101908080519060200190929190505050146100e457600080fd5b50565b610127806100f66000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c806347d54a4514602d575b600080fd5b606c60048036036020811015604157600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050606e565b005b6127108173ffffffffffffffffffffffffffffffffffffffff166318160ddd6040518163ffffffff1660e01b815260040160206040518083038186803b15801560b657600080fd5b505afa15801560c9573d6000803e3d6000fd5b505050506040513d602081101560de57600080fd5b81019080805190602001909291905050501460f857600080fd5b5056fea165627a7a723058201eaa86ca0d93585836b0d06315ab78c83079efff596c1a0417c5195ad0fc9e2d0029";
+  
+    async function test(){
+      const contract = new web3.eth.Contract(abi);
+      const contractAddress = document.getElementById("contractAddress").value;
+
+      // First we check max gas limit.
+      let gasLimit = 8000029;
+      await web3.eth.getBlock("latest", false, (error, result) => {
+        gasLimit = result.gasLimit;
+      });
+      
+      contract.deploy({
+        data: bytecode,
+        arguments: [contractAddress]
+      }).estimateGas({
+        from: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+      }, (err, gas) => {
+      
+        // If there is no error and gas is bellow has limit the test succedded.
+        if(err === null && gas < gasLimit)
+        {
+          document.getElementById("console").innerHTML = "Contract has 10000 tokens."
+        } else {
+          document.getElementById("console").innerHTML = "Contract does NOT have 10000 tokens."
+        }
+      });
+    }
+
+  </script>
+  <h3>Testing if ERC721 enumerable contract has a total supply of 10.000.</h3>
+  <h4>Quick copy contract addresses for tests:</h4>
+  <b>SuSquares(passing test): </b>0xE9e3F9cfc1A64DFca53614a0182CFAD56c10624F <br/>
+  <b>Axie infinity(failing test): </b>0xf5b0a3efb8e8e4c201e2a935f110eaaf3ffecb8d <br/><br/>
+  <input id="contractAddress" type="text" placeholder="Input contract address" />
+  <button onclick="test()">Test</button>
+  <p id="console"></p>
+</body>
+</html>

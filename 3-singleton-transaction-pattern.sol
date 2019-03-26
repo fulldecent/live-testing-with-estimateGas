@@ -1,4 +1,4 @@
-pragma solidity 0.5.2;
+pragma solidity 0.5.6;
 import "https://github.com/0xcert/ethereum-erc721/src/contracts/tokens/erc721-enumerable.sol";
 
 contract SuSquaresTests
@@ -22,13 +22,8 @@ contract SuSquaresTests
     ERC721Enumerable _testSubject
   )
     public
-    view
-    returns (bool testResult)
   { 
-    // Perform complicated testing.
-    // Assume this test implementation must make state changes to mainnet to work,
-    // for some good reason.
-    testResult = _testSubject.totalSupply() == 10000;
+    require(_testSubject.totalSupply() == 10000);
   }
   
 }

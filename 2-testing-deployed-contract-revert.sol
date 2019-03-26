@@ -1,4 +1,4 @@
-pragma solidity 0.5.2;
+pragma solidity 0.5.6;
 import "https://github.com/0xcert/ethereum-erc721/src/contracts/tokens/erc721-enumerable.sol";
 
 contract SuSquaresTests
@@ -22,10 +22,8 @@ contract SuSquaresTests
    */
   function testIsTotalSupply10000()
     external
-    view
-    returns (bool testResult)
   { 
-    testResult = testSubject.totalSupply() == 10000;
+    require(testSubject.totalSupply() == 10000);
   }
   
 }
