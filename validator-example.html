@@ -1,53 +1,137 @@
-THIS FILE RUNS THE VALIDATOR
-
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
-    <title>Validator</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.34/dist/web3.min.js" type="text/javascript"></script>
+    <title>Validator example</title>
   </head>
 
   <body>
-    <div class="container text-center my-5">
-      <input id="address" class="w-100 form-control form-control-lg">
-      <button class="m-a btn btn-primary" id="validate">Validate</button>
-      <p class="lead" id="outcome"></p>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12">
+          <h1>Validator example</h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          <input id="address" placeholder="Input smart contract address" class="form-control form-control-lg">
+          <input id="token" placeholder="Input valid token" class="form-control form-control-lg invisible">
+          <button class="m-a btn btn-primary" id="validate">Validate</button>
+        <div class="col-sm-12"></div>
+      </div>
+      <div class="row">
+          <div class="col-sm-12" id="outcome">
+          </div>
+      </div>
     </div>
   </body>
 
   <script>
-  $(function(){
-    $('#validate').click(function(){
-      addr = $('#address').val(); // like 0xBDff6aeb83F064C3eB38360406AB8416cC8e20a2
-      console.log('sup' + addr);
-
-      var target = addr;
-      var caseId = 1;
-
-      var validatorContract = web3.eth.contract([{"inputs":[{"name":"target","type":"address"},{"name":"caseId","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]);
-      var contractData = validatorContract.new.getData(target, caseId, {
-        from: web3.eth.accounts[0],
-        data: '0x608060405234801561001057600080fd5b5060405160408061020f83398101604052805160209091015160018114156100495761004482640100000000610052810204565b61004b565bfe5b50506101cc565b6000610087827f01ffc9a700000000000000000000000000000000000000000000000000000000640100000000610096810204565b905080151561009257fe5b5050565b600080806100cd857f01ffc9a700000000000000000000000000000000000000000000000000000000640100000000610180810204565b90925090508115806100dd575080155b156100eb5760009250610178565b61011e857fffffffff00000000000000000000000000000000000000000000000000000000640100000000610180810204565b909250905081158061012f57508015155b1561013d5760009250610178565b6101508585640100000000610180810204565b90925090506001821480156101655750806001145b156101735760019250610178565b600092505b505092915050565b6040517f01ffc9a70000000000000000000000000000000000000000000000000000000080825260048201839052600091829190602081818189617530fa905190969095509350505050565b6035806101da6000396000f3006080604052600080fd00a165627a7a7230582077757ae86173903bd41ab13e46d71d6904dc360c179ebf1fd1b52c1e51d0cce70029',
-        gas: '6969696'
-      });
-
-      web3.eth.estimateGas({data: contractData}, function (e, result){
-        console.log('yo');
-        console.log(e, result);
-        if (!e) {
-          $("#outcome").text('Passed TEST 1')
-        } else {
-          $("#outcome").text('Error TEST 1')
+  
+  window.addEventListener('load', async () => {
+    if (window.ethereum) {
+        window.web3 = new Web3(ethereum);
+        try {
+            await ethereum.enable();
+        } catch (error) {
+          $("#outcome").text('No web3 provider. Install Metamask.');
         }
-      });
+    }
+    else if (window.web3) {
+        window.web3 = new Web3(web3.currentProvider);
+    }
+    else {
+      $("#outcome").text('No web3 provider. Install Metamask.');
+    }
 
-      $("#outcome").text('Pending TEST 1')
+    $('#validate').click(async function(){
+      const addr = $('#address').val();
+      const token = $('#token').val();
+      if(token !== '') {
+
+      } else if (await baseValidation(1, addr))  {
+        $("#outcome").html('Is a contract');
+        if (await baseValidation(2, addr) && await baseValidation(3, addr)) {
+          if (await baseValidation(4, addr))  {
+            const validId = await getTokenId(addr);
+            const owner = await getTokenOwner(addr, validId);
+          } else {
+            $("#token").removeClass('invisible');
+            $("#outcome").html('No enumerable extension. Input a valid token ID.');
+          }
+        } else {
+          $("#outcome").html('Not erc721 contract.');
+        }
+      } else {
+        $("#outcome").html('Is not a contract');
+      }
     });
   });
+
+  async function baseValidation(test, addr) {
+    const abi = [{"inputs":[{"name":"_caseId","type":"uint256"},{"name":"_target","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"}];
+    const bytecode = '0x608060405234801561001057600080fd5b506040516040806102bd8339810180604052604081101561003057600080fd5b508051602090910151600182141561005657610051816100a760201b60201c565b6100a0565b816002141561006e57610051816100cc60201b60201c565b8160031415610086576100518161016860201b60201c565b816004141561009e57610051816101eb60201b60201c565bfe5b5050610274565b6100c3816001600160a01b031661026e60201b6100091760201c565b6100c957fe5b50565b604080517f01ffc9a700000000000000000000000000000000000000000000000000000000808252600482015290516000916001600160a01b038416916301ffc9a791602480820192602092909190829003018186803b15801561012f57600080fd5b505afa158015610143573d6000803e3d6000fd5b505050506040513d602081101561015957600080fd5b505190508061016457fe5b5050565b604080517f01ffc9a70000000000000000000000000000000000000000000000000000000081527f80ac58cd00000000000000000000000000000000000000000000000000000000600482015290516000916001600160a01b038416916301ffc9a791602480820192602092909190829003018186803b15801561012f57600080fd5b604080517f01ffc9a70000000000000000000000000000000000000000000000000000000081527f780e9d6300000000000000000000000000000000000000000000000000000000600482015290516000916001600160a01b038416916301ffc9a791602480820192602092909190829003018186803b15801561012f57600080fd5b3b151590565b603b806102826000396000f3fe6080604052600080fd5b3b15159056fea165627a7a723058202cf6c3268162b39aabc886838fdf4803288299d95ab055a65746f04b3cb7334f0029';
+    const basicValidator = new web3.eth.Contract(abi, {
+        from: '0xe96D860C8BBB30F6831E6E65d327295B7A0C524f', // default from address
+    });
+    return new Promise(async (resolve, reject) => {
+      await basicValidator.deploy({
+          data: bytecode,
+          arguments: [test, addr]
+      }).estimateGas((err, gas) => {
+        if (!err) {
+          resolve(true);
+        } else if (String(err).includes('gas required exceeds allowance or always failing transaction')) {
+          resolve(false);
+        } else {
+          resolve(false);
+        }
+      }).catch((e) => resolve(false));
+    });
+  }
+
+  async function getTokenId(addr) {
+      const abi = [{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"tokenByIndex","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}];
+      const erc721Enumerable = new web3.eth.Contract(abi, addr, {
+          from: '0xe96D860C8BBB30F6831E6E65d327295B7A0C524f', // default from address
+      });
+      return new Promise(async (resolve, reject) => {
+        await erc721Enumerable.methods.tokenByIndex(0).call()
+        .then((id) => resolve(id))
+        .catch((e) => resolve(null));
+      });
+  }
+
+  async function getTokenOwner(addr, id) {
+      const abi = [{"constant":true,"inputs":[{"name":"_tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"}];
+      const erc721 = new web3.eth.Contract(abi, addr, {
+          from: '0xe96D860C8BBB30F6831E6E65d327295B7A0C524f', // default from address
+      });
+      return new Promise(async (resolve, reject) => {
+        await erc721.methods.ownerOf(id).call()
+        .then((id) => resolve(id))
+        .catch((e) => resolve(null));
+      });
+  }
+
+  async function checkSafeTransfer(addr, owner, id, test) {
+   /* const abi = [{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_tokenId","type":"uint256"},{"name":"_data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}];
+      const erc721 = new web3.eth.Contract(abi, addr);
+      return new Promise(async (resolve, reject) => {
+        await erc721.methods.safeTransferFrom(owner, , id).estimateGas({ from: owner }, (err, gas) => {
+          if (!err) {
+            resolve(true);
+          } else if (String(err).includes('gas required exceeds allowance or always failing transaction')) {
+            resolve(false);
+          } else {
+            resolve(false);
+          }
+        }).catch((e) => resolve(false));
+      });*/
+  }
   </script>
 </html>
