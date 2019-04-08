@@ -1,72 +1,210 @@
-THIS IS THE FINAL VERSION THAT SHOWS TESTING:
+pragma solidity 0.5.6;
+import "https://github.com/0xcert/ethereum-erc721/src/contracts/tokens/erc721.sol";
+import "https://github.com/0xcert/ethereum-erc721/src/contracts/tokens/erc721-token-receiver.sol";
+import "https://github.com/0xcert/ethereum-erc721/src/contracts/tokens/erc721-enumerable.sol";
+import "https://github.com/0xcert/ethereum-erc721/src/contracts/utils/erc165.sol";
+import "https://github.com/0xcert/ethereum-erc721/src/contracts/utils/address-utils.sol";
 
-- one test case
-- with a stub receiver
-
-
-xxxxx
-
-
-pragma solidity ^0.4.24;
-
-interface ERC721{}
-
-contract validator
+contract BasicValidator
 {
-    constructor(ERC721 target, int caseId) public {
-        if (caseId == 1) {
-            testCase1(target);
-            return;
-        }
-        assert(false);
+  using AddressUtils for address;
+
+  bytes4 constant ERC165ID = 0x01ffc9a7;
+  bytes4 constant ERC721ID = 0x80ac58cd;
+  bytes4 constant ERC721EnumerableID = 0x780e9d63;
+
+  constructor(
+    uint256 _caseId,
+    address _target
+  ) 
+    public 
+  {
+    if (_caseId == 1) { 
+      sanityCheck(_target);
+      return;
+    } else if (_caseId == 2) {
+      checkERC165Interface(_target);
+      return;
+    } else if (_caseId == 3) {
+      checkERC721Interface(_target);
+      return;
+    } else if (_caseId == 4) {
+      checkERC721EnumerableInterface(_target);
+      return;
     }
 
-    function testCase1(ERC721 target) internal view {
-        bool result = doesContractImplementInterface(target, ERC165ID);
-        assert(result);
+    assert(false);
+  }
+  
+  /**
+   * @dev Sanity checks
+   * Find the amount of value (ether) assigned to CONTRACT_ADDRESS, it should be greater than or 
+   * equal to zero. Find the code_size of CONTRACT_ADDRESS, it should be greater than zero.
+   */
+  function sanityCheck(
+    address _target
+  )
+    internal
+    view 
+  {
+    require(_target.balance >= 0);
+    assert(_target.isContract());
+  }
+
+  /**
+   * @dev Check interface 165.
+   */
+  function checkERC165Interface(
+    address _target
+  ) 
+    internal
+    view
+  {
+    bool result = ERC165(_target).supportsInterface(ERC165ID);
+    assert(result);
+  }
+  
+  /**
+   * @dev Check interface ERC721.
+   */
+  function checkERC721Interface(
+    address _target
+  ) 
+    internal
+    view
+  {
+    bool result = ERC165(_target).supportsInterface(ERC721ID);
+    assert(result);
+  }
+  
+  /**
+   * @dev Check interface ERC721Enumerable.
+   */
+  function checkERC721EnumerableInterface(
+    address _target
+  ) 
+    internal
+    view
+  {
+    bool result = ERC165(_target).supportsInterface(ERC721EnumerableID);
+    assert(result);
+  }
+}
+
+contract Stub1 is
+  ERC721TokenReceiver
+{
+  bytes4 constant MAGIC_ON_ERC721_RECEIVED = 0x150b7a02;
+  
+  /**
+   * @dev Receive token and map id to contract address (which is parsed from data).
+   */
+  function onERC721Received(
+    address _operator,
+    address _from,
+    uint256 _tokenId,
+    bytes calldata _data
+  )
+    external
+    returns(bytes4)
+  {
+    require(StringUtils.compare(_data, "") == 0);
+    return MAGIC_ON_ERC721_RECEIVED;
+  }
+
+  function transferToken(
+    address _contract,
+    uint256 _tokenId,
+    address _receiver
+  )
+    external
+  {
+    ERC721(_contract).transferFrom(ERC721(_contract).ownerOf(_tokenId), _receiver, _tokenId);
+  }
+}
+
+contract Stub2 is
+  ERC721TokenReceiver
+{
+  bytes4 constant MAGIC_ON_ERC721_RECEIVED = 0x150b7a02;
+  
+  /**
+   * @dev Receive token and map id to contract address (which is parsed from data).
+   */
+  function onERC721Received(
+    address _operator,
+    address _from,
+    uint256 _tokenId,
+    bytes calldata _data
+  )
+    external
+    returns(bytes4)
+  {
+    require(StringUtils.compare(_data, "ffff") == 0);
+    return MAGIC_ON_ERC721_RECEIVED;
+  }
+}
+
+contract Stub3 is
+  ERC721TokenReceiver
+{
+  bytes4 constant MAGIC_ON_ERC721_RECEIVED_FALSE = 0x150b7a0b;
+  
+  /**
+   * @dev Receive token and map id to contract address (which is parsed from data).
+   */
+  function onERC721Received(
+    address _operator,
+    address _from,
+    uint256 _tokenId,
+    bytes calldata _data
+  )
+    external
+    returns(bytes4)
+  {
+    return MAGIC_ON_ERC721_RECEIVED_FALSE;
+  }
+}
+
+library StringUtils {
+  
+  function compare(
+    bytes memory _a,
+    string memory _b
+  )
+    internal
+    pure
+    returns (int)
+  {
+    bytes memory a = _a;
+    bytes memory b = bytes(_b);
+    uint minLength = a.length;
+    if (b.length < minLength) 
+    {
+      minLength = b.length;
     }
-
-    bytes4 constant InvalidID = 0xffffffff;
-    bytes4 constant ERC165ID = 0x01ffc9a7;
-
-    function doesContractImplementInterface(address _contract, bytes4 _interfaceId) internal view returns (bool) {
-        uint256 success;
-        uint256 result;
-
-        (success, result) = noThrowCall(_contract, ERC165ID);
-        if ((success==0)||(result==0)) {
-            return false;
-        }
-
-        (success, result) = noThrowCall(_contract, InvalidID);
-        if ((success==0)||(result!=0)) {
-            return false;
-        }
-
-        (success, result) = noThrowCall(_contract, _interfaceId);
-        if ((success==1)&&(result==1)) {
-            return true;
-        }
-        return false;
+    for (uint i = 0; i < minLength; i ++)
+    {
+      if (a[i] < b[i])
+      {
+        return -1;
+      }
+      else if (a[i] > b[i]) 
+      {
+        return 1;
+      }
     }
-
-    function noThrowCall(address _contract, bytes4 _interfaceId) constant internal returns (uint256 success, uint256 result) {
-        bytes4 erc165ID = ERC165ID;
-
-        assembly {
-                let x := mload(0x40)               // Find empty storage location using "free memory pointer"
-                mstore(x, erc165ID)                // Place signature at begining of empty storage
-                mstore(add(x, 0x04), _interfaceId) // Place first argument directly next to signature
-
-                success := staticcall(
-                                    30000,         // 30k gas
-                                    _contract,     // To addr
-                                    x,             // Inputs are stored at location x
-                                    0x20,          // Inputs are 32 bytes long
-                                    x,             // Store output over input (saves space)
-                                    0x20)          // Outputs are 32 bytes long
-
-                result := mload(x)                 // Load the result
-        }
+    if (a.length < b.length)
+    {
+      return -1;
     }
+    else if (a.length > b.length)
+    {
+      return 1;
+    }
+    else
+    {
+      return 0;
+    }
+  }
 }
