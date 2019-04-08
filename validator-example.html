@@ -21,10 +21,12 @@
           <input id="address" placeholder="Input smart contract address" class="form-control form-control-lg">
           <input id="token" placeholder="Input valid token" class="form-control form-control-lg invisible">
           <button class="m-a btn btn-primary" id="validate">Validate</button>
-        <div class="col-sm-12"></div>
+        </div>
       </div>
+      <br/>
       <div class="row">
-          <div class="col-sm-12" id="outcome">
+          <div class="col-sm-12">
+            <div class="alert" id="outcome" role="alert"></div>
           </div>
       </div>
     </div>
@@ -38,36 +40,39 @@
         try {
             await ethereum.enable();
         } catch (error) {
-          $("#outcome").text('No web3 provider. Install Metamask.');
+          
+          setAlertLabel('No web3 provider. Install Metamask.', false);
         }
     }
     else if (window.web3) {
         window.web3 = new Web3(web3.currentProvider);
     }
     else {
-      $("#outcome").text('No web3 provider. Install Metamask.');
+      setAlertLabel('No web3 provider. Install Metamask.', false);
     }
 
     $('#validate').click(async function(){
       const addr = $('#address').val();
       const token = $('#token').val();
       if(token !== '') {
-
+        const owner = await getTokenOwner(addr, token);
+        runSafeTransferTests(addr, owner, token);
       } else if (await baseValidation(1, addr))  {
-        $("#outcome").html('Is a contract');
+        setAlertLabel('Is a contract', true);
         if (await baseValidation(2, addr) && await baseValidation(3, addr)) {
           if (await baseValidation(4, addr))  {
             const validId = await getTokenId(addr);
             const owner = await getTokenOwner(addr, validId);
+            runSafeTransferTests(addr, owner, validId);
           } else {
             $("#token").removeClass('invisible');
-            $("#outcome").html('No enumerable extension. Input a valid token ID.');
+            setAlertLabel('No enumerable extension. Input a valid token ID.', false);
           }
         } else {
-          $("#outcome").html('Not erc721 contract.');
+          setAlertLabel('Not erc721 contract.', false);
         }
       } else {
-        $("#outcome").html('Is not a contract');
+        setAlertLabel('Is not a contract', false);
       }
     });
   });
@@ -119,10 +124,20 @@
   }
 
   async function checkSafeTransfer(addr, owner, id, test) {
-   /* const abi = [{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_tokenId","type":"uint256"},{"name":"_data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}];
-      const erc721 = new web3.eth.Contract(abi, addr);
-      return new Promise(async (resolve, reject) => {
-        await erc721.methods.safeTransferFrom(owner, , id).estimateGas({ from: owner }, (err, gas) => {
+    let receiverContract = '0x37bc53a24ae06c141049252fa46f298fe989ea17';
+    if (test === 2)
+    {
+      receiverContract = '0xe0722368b19a2da09706e40dd3ad150095c427a3';
+    } else if (test === 3) {
+      receiverContract = '0x289d6d50fc98214d6a46a16dfc6308d9ea184adf';
+    }
+   
+    const abi = [{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_tokenId","type":"uint256"},{"name":"_data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}];
+    const erc721 = new web3.eth.Contract(abi, addr);
+    return new Promise(async (resolve, reject) => {
+      if(test === 2)
+      {
+        await erc721.methods.safeTransferFrom(owner, receiverContract, id, '0x66666666').estimateGas({ from: owner }, (err, gas) => {
           if (!err) {
             resolve(true);
           } else if (String(err).includes('gas required exceeds allowance or always failing transaction')) {
@@ -131,7 +146,41 @@
             resolve(false);
           }
         }).catch((e) => resolve(false));
-      });*/
+      } else {
+        await erc721.methods.safeTransferFrom(owner, receiverContract, id).estimateGas({ from: owner }, (err, gas) => {
+          if (!err) {
+            resolve(true);
+          } else if (String(err).includes('gas required exceeds allowance or always failing transaction')) {
+            resolve(false);
+          } else {
+            resolve(false);
+          }
+        }).catch((e) => resolve(false));
+      }
+    });
+  }
+
+  async function runSafeTransferTests(addr, owner, id) {
+    setAlertLabel('Checking safe transfer', true);
+    if (await checkSafeTransfer(addr, owner, id, 1) &&
+      await checkSafeTransfer(addr, owner, id, 2) && 
+      !await checkSafeTransfer(addr, owner, id, 3))
+    {
+      setAlertLabel('Safe transfer test successful.', true);
+    } else {
+      setAlertLabel('Safe transfer test failed.', false);
+    }
+  }
+
+  function setAlertLabel(text, success) {
+    if (success) {
+      $("#outcome").removeClass('alert-danger');
+      $("#outcome").addClass('alert-success');
+    } else {
+      $("#outcome").removeClass('alert-success');
+      $("#outcome").addClass('alert-danger');
+    }
+    $("#outcome").html(text);
   }
   </script>
 </html>
