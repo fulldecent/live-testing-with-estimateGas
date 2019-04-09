@@ -14,7 +14,7 @@
       <div class="row">
         <div class="col-sm-12">
           <h1>Validator example</h1>
-          This validator checks if inputed address is an erc721 smart contract and if so checks if its safeTransferFrom function is correctly implemented.
+          This validator checks if inputed address is an ERC-721 smart contract and if so checks if its safeTransferFrom function is correctly implemented.
           <br/>
           We assume that you have Metamask installed and you are on main network. It will not cost you anything to validate any smart contract.
           <br/><br/>
@@ -31,17 +31,17 @@
               <tbody>
                 <tr>
                   <td>0x06012c8cf97BEaD5deAe237070F9587f8E7A266d</td>
-                  <td>Crypto kitties smart contract. It is pre erc721 standard.</td>
+                  <td>CryptoKitties smart contract. It is pre ERC-721 standard.</td>
                   <td>Failue</td>
                 </tr>
                 <tr>
                   <td>0xE9e3F9cfc1A64DFca53614a0182CFAD56c10624F</td>
-                  <td>Su squares smart contract. It is erc721 and implements enumerable extensions so all test will start automatically.</td>
+                  <td>Su Squares smart contract. It is ERC-721 and implements enumerable extensions so all test will start automatically.</td>
                   <td>Success</td>
                 </tr>
                 <tr>
                   <td>0xf87e31492faf9a91b02ee0deaad50d51d56d5d4d</td>
-                  <td>Decentraland smart contract. It is erc721 but does not implement enumerable so you will get a prompt to imput a valid token id.</td>
+                  <td>Decentraland smart contract. It is ERC-721 but does not implement enumerable so you will get a prompt to imput a valid token id.</td>
                   <td>Failue</td>
                 </tr>
               </tbody>
@@ -102,7 +102,7 @@
             setAlertLabel('No enumerable extension. Input a valid token ID.', false);
           }
         } else {
-          setAlertLabel('Not erc721 contract.', false);
+          setAlertLabel('Not a ERC-721 contract.', false);
         }
       } else {
         setAlertLabel('Is not a contract', false);
