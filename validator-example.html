@@ -42,7 +42,7 @@
                 <tr>
                   <td>0xf87e31492faf9a91b02ee0deaad50d51d56d5d4d</td>
                   <td>Decentraland smart contract. It is ERC-721 but does not implement enumerable so you will get a prompt to imput a valid token id.</td>
-                  <td>Failue</td>
+                  <td>Success</td>
                 </tr>
               </tbody>
             </table>
@@ -161,12 +161,12 @@
   }
 
   async function checkSafeTransfer(addr, owner, id, test) {
-    let receiverContract = '0x37bc53a24ae06c141049252fa46f298fe989ea17';
+    let receiverContract = '0x3324ee50d08af84ea6febb53ed8905067e9118a9';
     if (test === 2)
     {
-      receiverContract = '0xe0722368b19a2da09706e40dd3ad150095c427a3';
+      receiverContract = '0x7b0a8a3f36fe03e6bcab71cc51d04d88df92f621';
     } else if (test === 3) {
-      receiverContract = '0x289d6d50fc98214d6a46a16dfc6308d9ea184adf';
+      receiverContract = '0xf4000c1e8f216b4ad89fb3897cbbbd59ce642e21';
     }
    
     const abi = [{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_tokenId","type":"uint256"},{"name":"_data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}];
