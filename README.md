@@ -11,4 +11,4 @@ Done.
 
 Also this works WITH TOUCHING blockchain. You can run it server side and it scales.
 
-![ss1](ss1.png)
+![validator](validator.gif)
