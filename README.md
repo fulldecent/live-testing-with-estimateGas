@@ -5,6 +5,8 @@ This repo contains code examples for article written about estimate gas testing 
 
 Compile code in remix.
 
+![remix](remix.gif)
+
 Then edit the code in the html file.
 
 Done.
