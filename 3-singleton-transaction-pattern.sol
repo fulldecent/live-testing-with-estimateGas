@@ -23,7 +23,7 @@ contract SuSquaresTests
   )
     public
   { 
-    require(_testSubject.totalSupply() == 10000);
+    assert(_testSubject.totalSupply() == 10000);
   }
   
 }
